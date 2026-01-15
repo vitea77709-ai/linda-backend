@@ -55,8 +55,7 @@ def chat(data: Msg):
     r = requests.post(url, json=payload, headers=headers)
     with open(file_name, "wb") as f:
         f.write(r.content)
-
-    return {
-        "text": text,
-        "voice": "/" + file_name
-    }
+return {
+    "text": reply,
+    "voice": f"https://linda-ai-dj.onrender.com/static/{filename}"
+}
