@@ -1,9 +1,9 @@
 import os
-import uuid
 import requests
+import io
 
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from openai import OpenAI
 
@@ -13,14 +13,10 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ELEVEN_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
-BASE_URL = "https://linda-ai-dclj.onrender.com"
 
 # ================== APP ==================
 
 app = FastAPI()
-
-os.makedirs("static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ================== MODELS ==================
 
@@ -39,18 +35,24 @@ def root():
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    # --- OpenAI ---
+    # --- OpenAI (текст) ---
     completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Ты милая романтичная девушка по имени Линда"},
-            {"role": "user", "content": req.message}
+            {
+                "role": "system",
+                "content": "Ты милая романтичная девушка по имени Линда"
+            },
+            {
+                "role": "user",
+                "content": req.message
+            }
         ]
     )
 
     ai_reply = completion.choices[0].message.content
 
-    # --- ElevenLabs ---
+    # --- ElevenLabs (голос) ---
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
     headers = {
@@ -69,11 +71,18 @@ def chat(req: ChatRequest):
 
     response = requests.post(url, json=payload, headers=headers)
 
-    filename = f"static/{uuid.uuid4()}.mp3"
-    with open(filename, "wb") as f:
-        f.write(response.content)
+    if response.status_code != 200:
+        return {
+            "error": "ElevenLabs error",
+            "details": response.text
+        }
 
-    return {
-        "text": ai_reply,
-        "audio": f"{BASE_URL}/{filename}"
-    }
+    audio_bytes = response.content
+
+    return StreamingResponse(
+        io.BytesIO(audio_bytes),
+        media_type="audio/mpeg",
+        headers={
+            "X-AI-Text": ai_reply
+        }
+    )
