@@ -41,11 +41,12 @@ def speak(text: str):
     }
 
     payload = {
-        "text": ai_reply,
-        "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.7
-        }
+    "text": ai_reply,
+    "model_id": "eleven_multilingual_v2",
+    "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.7
+    }
     }
 
     response = requests.post(url, json=payload, headers=headers)
