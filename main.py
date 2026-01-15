@@ -7,6 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from openai import OpenAI
 
+class ChatRequest(BaseModel):
+    message: str
 # ================== НАСТРОЙКИ ==================
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
