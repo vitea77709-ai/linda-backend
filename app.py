@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ELEVEN_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
-BASE_URL = "https://linda-ai-dj.onrender.com"
+BASE_URL = "https://linda-ai-dclj.onrender.com"
 
 # ================== APP ==================
 
