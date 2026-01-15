@@ -57,29 +57,28 @@ def chat(data: Msg):
 
     text = response.choices[0].message.content
 
-    # --- 2. Генерация MP3 через ElevenLabs (ИСПРАВЛЕНО) ---
-filename = f"{uuid.uuid4()}.mp3"
-file_path = os.path.join("static", filename)
+   # ===== ELEVENLABS =====
 
-url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"
+text = ai_reply  # ВАЖНО! объявляем переменную
+
+url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
 
 headers = {
     "xi-api-key": ELEVEN_API_KEY,
-    "Accept": "audio/mpeg",
     "Content-Type": "application/json"
 }
 
 payload = {
     "text": text,
-    "model_id": "eleven_multilingual_v2",
     "voice_settings": {
-        "stability": 0.4,
-        "similarity_boost": 0.8
+        "stability": 0.5,
+        "similarity_boost": 0.7
     }
 }
 
-r = requests.post(url, json=payload, headers=headers)
-r.raise_for_status()
+response = requests.post(url, json=payload, headers=headers)
 
-with open(file_path, "wb") as f:
-    f.write(r.content)
+filename = f"static/{uuid.uuid4()}.mp3"
+
+with open(filename, "wb") as f:
+    f.write(response.content)
