@@ -1,15 +1,15 @@
 import os
 import uuid
 import requests
+import openai
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from openai import OpenAI
 
 # ================== НАСТРОЙКИ ==================
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 ELEVEN_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 VOICE_ID = "EXAVITQu4vr4xnSDxMaL"
@@ -27,10 +27,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 class ChatRequest(BaseModel):
     message: str
 
-# ================== OPENAI ==================
-
-client = OpenAI(api_key=OPENAI_API_KEY)
-
 # ================== ROUTES ==================
 
 @app.get("/")
@@ -40,15 +36,15 @@ def root():
 @app.post("/chat")
 def chat(req: ChatRequest):
     # --- OpenAI ---
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "Ты милая романтичная девушка по имени Линда"},
             {"role": "user", "content": req.message}
         ]
     )
 
-    ai_reply = completion.choices[0].message.content
+    ai_reply = completion["choices"][0]["message"]["content"]
 
     # --- ElevenLabs ---
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
