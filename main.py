@@ -61,8 +61,7 @@ def chat(data: Msg):
 filename = f"{uuid.uuid4()}.mp3"
 file_path = os.path.join("static", filename)
 
-url = 
-f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"
+url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"
 
 headers = {
     "xi-api-key": ELEVEN_API_KEY,
