@@ -37,25 +37,44 @@ class Msg(BaseModel):
 @app.get("/")
 def root():
     return {"status": "ok"}
-
 @app.post("/chat")
-def chat(data: Msg):
-    # --- 1. Запрос к OpenAI ---
-    response = client.chat.completions.create(
+def chat(req: ChatRequest):
+    completion = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {
-                "role": "system",
-                "content": "Ты романтичная и заботливая ИИ-девушка по имени Линда."
-            },
-            {
-                "role": "user",
-                "content": data.message
-            }
+            {"role": "system", "content": "Ты милая девушка по имени Линда"},
+            {"role": "user", "content": req.message}
         ]
     )
 
-    text = response.choices[0].message.content
+    ai_reply = completion.choices[0].message.content
+
+    text = ai_reply
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}"
+
+    headers = {
+        "xi-api-key": ELEVEN_API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "text": text,
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.7
+        }
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    filename = f"static/{uuid.uuid4()}.mp3"
+    with open(filename, "wb") as f:
+        f.write(response.content)
+
+    return {
+        "text": ai_reply,
+        "audio": f"{BASE_URL}/{filename}"
+    }
 
    # ===== ELEVENLABS =====
 
